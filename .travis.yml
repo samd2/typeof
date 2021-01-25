@@ -164,7 +164,6 @@ matrix:
       env: TOOLSET=clang COMPILER=clang++ CXXSTD=03,11,14,1z
 
 install:
-  - set -xe
   - BOOST_BRANCH=develop && [ "$TRAVIS_BRANCH" == "master" ] && BOOST_BRANCH=master || true
   - cd ..
   - git clone -b $BOOST_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
@@ -180,7 +179,6 @@ install:
 script:
   - |-
     echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
-  - set -xe
   - ./b2 libs/typeof/test toolset=$TOOLSET cxxstd=$CXXSTD
 
 notifications:
