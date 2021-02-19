@@ -226,7 +226,7 @@ jobs:
           TRAVIS_OS_NAME: "linux"
         run: |
           echo '==================================> SETUP'
-          BOOST_CI_ORG=boostorg BOOST_CI_BRANCH=master && wget https://github.com/$BOOST_CI_ORG/boost-ci/archive/$BOOST_CI_BRANCH.tar.gz && tar -xvf $BOOST_CI_BRANCH.tar.gz && mkdir -p .github &&  mv boost-ci-$BOOST_CI_BRANCH .github/boost-ci
+          # BOOST_CI_ORG=boostorg BOOST_CI_BRANCH=master && wget https://github.com/$BOOST_CI_ORG/boost-ci/archive/$BOOST_CI_BRANCH.tar.gz && tar -xvf $BOOST_CI_BRANCH.tar.gz && mkdir -p .github &&  mv boost-ci-$BOOST_CI_BRANCH .github/boost-ci
           echo '==================================> PACKAGES'
           set -ex
           echo "Before package removal or install"
@@ -311,11 +311,14 @@ jobs:
           ./b2 libs/typeof/test toolset=$TOOLSET cxxstd=$CXXSTD
 
           fi
-  osx:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
+#
+# Github Actions only supports Xcode versions 10.3 and above
+# 
+#   osx:
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         include:
 #
 # Github Actions only supports Xcode versions 10.3 and above
 # Change (or delete) the Xcode version for this job.
@@ -332,73 +335,76 @@ jobs:
 #             toolset: "clang"
 #             compiler: "clang++"
 #             cxxstd: "03,11,14,1z"
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set DEVELOPER_DIR
-        if: matrix.xcode_version != ''
-        run: echo "DEVELOPER_DIR=/Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer" >> $GITHUB_ENV
-      - name: Test DEVELOPER_DIR
-        run: echo $DEVELOPER_DIR
-
-      - name: "osx"
-        shell: bash
-        env:
-          CXX: ${{ matrix.cxx }}
-          SOURCES: ${{ matrix.sources }}
-          LLVM_OS: ${{ matrix.llvm_os }}
-          LLVM_VER: ${{ matrix.llvm_ver }}
-          PACKAGES: ${{ matrix.packages }}
-          JOB_BUILDTYPE: ${{ matrix.buildtype }}
-          TOOLSET: ${{ matrix.toolset }}
-          COMPILER: ${{ matrix.compiler }}
-          CXXSTD: ${{ matrix.cxxstd }}
-          TRAVIS_BRANCH: ${{ github.base_ref }}
-          TRAVIS_OS_NAME: "osx"
-        run: |
-          echo '==================================> SETUP'
-          set -ex
-          uname -a
-          whoami
-          sudo mv /Library/Developer/CommandLineTools /Library/Developer/CommandLineTools.bck
-          BOOST_CI_ORG=boostorg BOOST_CI_BRANCH=master && /usr/local/bin/wget https://github.com/$BOOST_CI_ORG/boost-ci/archive/$BOOST_CI_BRANCH.tar.gz && tar -xvf $BOOST_CI_BRANCH.tar.gz && mkdir -p .github &&  mv boost-ci-$BOOST_CI_BRANCH .github/boost-ci
-          echo '==================================> PACKAGES'
-          echo "the equivalent of osx-cxx-install.sh would run here."
-
-          echo '==================================> INSTALL AND COMPILE'
-          set -e
-          set -x
-          export TRAVIS_BUILD_DIR=$(pwd)
-          export TRAVIS_BRANCH=${TRAVIS_BRANCH:-$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')}
-          export VCS_COMMIT_ID=$GITHUB_SHA
-          export GIT_COMMIT=$GITHUB_SHA
-          export REPO_NAME=$(basename $GITHUB_REPOSITORY)
-          export USER=$(whoami)
-          export CC=${CC:-gcc}
-          export PATH=~/.local/bin:/usr/local/bin:$PATH
-
-          if [ "$JOB_BUILDTYPE" == "boost" ]; then
-
-          echo '==================================> INSTALL'
-
-          BOOST_BRANCH=develop && [ "$TRAVIS_BRANCH" == "master" ] && BOOST_BRANCH=master || true
-          cd ..
-          git clone -b $BOOST_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
-          cd boost-root
-          git submodule update --init tools/build
-          git submodule update --init libs/config
-          git submodule update --init tools/boostdep
-          cp -r $TRAVIS_BUILD_DIR/* libs/typeof
-          python tools/boostdep/depinst/depinst.py typeof
-          ./bootstrap.sh
-          ./b2 headers
-
-          echo '==================================> SCRIPT'
-
-          echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
-          ./b2 libs/typeof/test toolset=$TOOLSET cxxstd=$CXXSTD
-
-          fi
+#
+# Github Actions only supports Xcode versions 10.3 and above
+# 
+# 
+#     runs-on: ${{ matrix.os }}
+# 
+#     steps:
+#       - uses: actions/checkout@v2
+# 
+#       - name: Set DEVELOPER_DIR
+#         if: matrix.xcode_version != ''
+#         run: echo "DEVELOPER_DIR=/Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer" >> $GITHUB_ENV
+#       - name: Test DEVELOPER_DIR
+#         run: echo $DEVELOPER_DIR
+# 
+#       - name: "osx"
+#         shell: bash
+#         env:
+#           CXX: ${{ matrix.cxx }}
+#           SOURCES: ${{ matrix.sources }}
+#           LLVM_OS: ${{ matrix.llvm_os }}
+#           LLVM_VER: ${{ matrix.llvm_ver }}
+#           PACKAGES: ${{ matrix.packages }}
+#           JOB_BUILDTYPE: ${{ matrix.buildtype }}
+#           TOOLSET: ${{ matrix.toolset }}
+#           COMPILER: ${{ matrix.compiler }}
+#           CXXSTD: ${{ matrix.cxxstd }}
+#           TRAVIS_BRANCH: ${{ github.base_ref }}
+#           TRAVIS_OS_NAME: "osx"
+#         run: |
+#           echo '==================================> SETUP'
+#           set -ex
+#           uname -a
+#           whoami
+#           sudo mv /Library/Developer/CommandLineTools /Library/Developer/CommandLineTools.bck
+#           # BOOST_CI_ORG=boostorg BOOST_CI_BRANCH=master && /usr/local/bin/wget https://github.com/$BOOST_CI_ORG/boost-ci/archive/$BOOST_CI_BRANCH.tar.gz && tar -xvf $BOOST_CI_BRANCH.tar.gz && mkdir -p .github &&  mv boost-ci-$BOOST_CI_BRANCH .github/boost-ci
+#           echo '==================================> PACKAGES'
+#           echo "the equivalent of osx-cxx-install.sh would run here."
+# 
+#           echo '==================================> INSTALL AND COMPILE'
+#           set -e
+#           set -x
+#           export TRAVIS_BUILD_DIR=$(pwd)
+#           export TRAVIS_BRANCH=${TRAVIS_BRANCH:-$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')}
+#           export VCS_COMMIT_ID=$GITHUB_SHA
+#           export GIT_COMMIT=$GITHUB_SHA
+#           export REPO_NAME=$(basename $GITHUB_REPOSITORY)
+#           export USER=$(whoami)
+#           export CC=${CC:-gcc}
+#           export PATH=~/.local/bin:/usr/local/bin:$PATH
+# 
+#           if [ "$JOB_BUILDTYPE" == "boost" ]; then
+# 
+#           echo '==================================> INSTALL'
+# 
+#           BOOST_BRANCH=develop && [ "$TRAVIS_BRANCH" == "master" ] && BOOST_BRANCH=master || true
+#           cd ..
+#           git clone -b $BOOST_BRANCH --depth 1 https://github.com/boostorg/boost.git boost-root
+#           cd boost-root
+#           git submodule update --init tools/build
+#           git submodule update --init libs/config
+#           git submodule update --init tools/boostdep
+#           cp -r $TRAVIS_BUILD_DIR/* libs/typeof
+#           python tools/boostdep/depinst/depinst.py typeof
+#           ./bootstrap.sh
+#           ./b2 headers
+# 
+#           echo '==================================> SCRIPT'
+# 
+#           echo "using $TOOLSET : : $COMPILER ;" > ~/user-config.jam
+#           ./b2 libs/typeof/test toolset=$TOOLSET cxxstd=$CXXSTD
+# 
+#           fi
